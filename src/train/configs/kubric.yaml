@@ -1,0 +1,39 @@
+data:
+  target: data.kubric_arbit.KubricSynthViewModule
+  params:
+    dset_root: ../../DATA/Kubric-4D/data
+    pcl_root: ../../DATA/Kubric-4D/pcl
+    train_videos: 2800
+    val_videos: 100
+    test_videos: 100
+    avail_frames: 60
+    model_frames: 49
+    input_frames: 49
+    output_frames: 49
+    center_crop: True
+    frame_width: 384
+    frame_height: 256
+    input_mode: arbitrary
+    output_mode: arbitrary
+    input_modality: rgb
+    output_modality: rgb
+    azimuth_range: [0.0, 360.0]
+    elevation_range: [0.0, 50.0]
+    radius_range: [12.0, 18.0]
+    delta_azimuth_range: [-90.0, 90.0]
+    delta_elevation_range: [-30.0, 30.0]
+    delta_radius_range: [-3.0, 3.0]
+    elevation_sample_sin: True
+    trajectory: interpol_linear
+    move_time: 13
+    modal_time: 0
+    camera_control: spherical
+    motion_bucket_range: [0, 255]
+    cond_aug: 0.02
+    mock_dset_size: 1120000  # = 400x train dataset count
+    reverse_prob: 0.2
+    spread_radius: 1
+    render_width: 420
+    render_height: 280
+    batch_size: 2
+    num_workers: 12
