@@ -1,4 +1,11 @@
 #!/bin/sh
+#SBATCH --gres=gpu:4
+#SBATCH --cpus-per-task=72
+#SBATCH --time=11:59:00
+#SBATCH -p eme_h200nv_8
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --comment pytorch
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:False
 GPU_IDX="0,1,2,3"
@@ -15,13 +22,6 @@ if [ "$USE_LORA" = "True" ]; then
 fi
 
 #SBATCH -J ${SAVE_NAME}
-#SBATCH --gres=gpu:4
-#SBATCH --cpus-per-task=72
-#SBATCH --time=11:59:00
-#SBATCH -p eme_h200nv_8
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --comment pytorch
 #SBATCH -o exp_nohup/%j_%x.txt
 #SBATCH -e exp_nohup/%j_%x.err
 
