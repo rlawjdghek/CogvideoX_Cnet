@@ -1,12 +1,27 @@
-#!/bin/bash
+#!/bin/sh
+#SBATCH -J H200_test
+#SBATCH --gres=gpu:4
+#SBATCH --cpus-per-task=72
+#SBATCH --time=11:59:00
+#SBATCH -p eme_h200nv_8
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --comment pytorch
+#SBATCH -o exp_nohup/%j_%x.txt
+#SBATCH -e exp_nohup/%j_%x.err
+
+#### checklist
+#### 1. save_name이랑 위에 J랑 맞추기
+#### 2. gpu 갯수 확인 (CUDA_VISIBLE_DEVICES, nproc_per_node, gres=gpu:)
+#### 3. master_port 확인
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:False
-GPU_IDX="2,3"
+GPU_IDX="0,1,2,3"
 NGPU=$(echo $GPU_IDX | tr -cd ',' | wc -c)
-BS=4
-HEIGHT=384
-WIDTH=576
-MAX_NUM_FRAMES=16
+BS=1
+HEIGHT=480
+WIDTH=720
+MAX_NUM_FRAMES=49
 USE_LORA=True
 SAVE_NAME="cnet_ablation_F${MAX_NUM_FRAMES}_H${HEIGHT}_W${WIDTH}_BS${BS}_GPU${NGPU}"
 

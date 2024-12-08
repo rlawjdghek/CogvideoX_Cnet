@@ -978,7 +978,6 @@ def main(args):
     train_dataset = data.train_dataset
     train_dataloader = data.train_dataloader()
     # jho added <<<<
-    breakpoint()
 
     # Scheduler and math around the number of training steps.
     overrode_max_train_steps = False
