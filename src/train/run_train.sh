@@ -1,4 +1,5 @@
 #!/bin/sh
+#SBATCH -J H200_test
 #SBATCH --gres=gpu:4
 #SBATCH --cpus-per-task=72
 #SBATCH --time=11:59:00
@@ -6,6 +7,8 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --comment pytorch
+#SBATCH -o exp_nohup/%j_%x.txt
+#SBATCH -e exp_nohup/%j_%x.err
 
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:False
 GPU_IDX="0,1,2,3"
@@ -21,9 +24,6 @@ if [ "$USE_LORA" = "True" ]; then
   SAVE_NAME="${SAVE_NAME}_lora"
 fi
 
-#SBATCH -J ${SAVE_NAME}
-#SBATCH -o exp_nohup/%j_%x.txt
-#SBATCH -e exp_nohup/%j_%x.err
 
 #### checklist
 #### 1. save_name이랑 위에 J랑 맞추기
