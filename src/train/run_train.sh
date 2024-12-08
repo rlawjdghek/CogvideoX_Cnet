@@ -31,7 +31,7 @@ fi
 #### 3. master_port 확인
 
 CURRENT_TIMESTAMP=$(TZ='Asia/Seoul' date +%Y%m%d)
-CUDA_VISIBLE_DEVICES=$GPU_IDX nohup accelerate launch --config_file ./configs/accelerate_config_machine_single.yaml --main_process_port 1315 --num_processes ${NGPU} \
+CUDA_VISIBLE_DEVICES=$GPU_IDX accelerate launch --config_file ./configs/accelerate_config_machine_single.yaml --main_process_port 1315 --num_processes ${NGPU} \
   train_controlnet.py \
   --train_batch_size ${BS} \
   --height ${HEIGHT} \
@@ -60,7 +60,7 @@ CUDA_VISIBLE_DEVICES=$GPU_IDX nohup accelerate launch --config_file ./configs/ac
   --lr_scheduler cosine_with_restarts \
   --lr_warmup_steps 250 \
   --save_name ${SAVE_NAME} \
-  --allow_tf32 &> "./exp_nohup/${CURRENT_TIMESTAMP}_${SAVE_NAME}.txt" &
+  --allow_tf32
   # --enable_slicing \
   # --enable_tiling \
   # --gradient_accumulation_steps 1 \
