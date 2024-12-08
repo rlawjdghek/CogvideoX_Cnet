@@ -12,7 +12,7 @@
 
 GPU_IDX="0,1"
 NGPU=$(echo $GPU_IDX | tr -cd ',' | wc -c)
-BS=2
+BS=1
 HEIGHT=480
 WIDTH=720
 MAX_NUM_FRAMES=49
