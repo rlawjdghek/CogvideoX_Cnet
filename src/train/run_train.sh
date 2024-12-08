@@ -7,15 +7,21 @@ BS=4
 HEIGHT=384
 WIDTH=576
 MAX_NUM_FRAMES=16
+USE_LORA=True
 SAVE_NAME="cnet_ablation_F${MAX_NUM_FRAMES}_H${HEIGHT}_W${WIDTH}_BS${BS}_GPU${NGPU}"
 
+if [ "$USE_LORA" = "True" ]; then
+  SAVE_NAME="${SAVE_NAME}_lora"
+fi
+
 CURRENT_TIMESTAMP=$(TZ='Asia/Seoul' date +%Y%m%d)
-CUDA_VISIBLE_DEVICES=$GPU_IDX nohup accelerate launch --config_file ./configs/accelerate_config_machine_single.yaml --main_process_port 1315 --num_processes ${NGPU} \
+CUDA_VISIBLE_DEVICES=$GPU_IDX accelerate launch --config_file ./configs/accelerate_config_machine_single.yaml --main_process_port 1315 --num_processes ${NGPU} \
   train_controlnet.py \
   --train_batch_size ${BS} \
   --height ${HEIGHT} \
   --width ${WIDTH} \
   --max_num_frames ${MAX_NUM_FRAMES} \
+  --use_lora ${USE_LORA} \
   --validation_steps 1000 \
   --checkpointing_steps 1000 \
   --data_cfg_path "./configs/kubric.yaml" \
@@ -53,3 +59,4 @@ CUDA_VISIBLE_DEVICES=$GPU_IDX nohup accelerate launch --config_file ./configs/ac
   # --video_root_dir "set-path-to-video-directory" \
   # --report_to wandb
   # --pretrained_controlnet_path "cogvideox-controlnet-2b/checkpoint-2000.pt" \
+

@@ -60,6 +60,7 @@ from cogvideo_controlnet import CogVideoXControlnet
 import time
 import datetime
 from einops import rearrange
+from utils import AverageMeter
 # jho added <<<<
 
 if is_wandb_available():
@@ -76,6 +77,9 @@ def get_args():
 
     # jho added >>>>
     parser.add_argument("--data_cfg_path", type=str)
+    parser.add_argument("--use_lora", type=bool, default=False)
+    parser.add_argument("--rank", type=int, default=128)
+    parser.add_argument("--lora_alpha", type=int, default=128)
     # jho added <<<<
 
     # Model information
@@ -865,6 +869,16 @@ def main(args):
         transformer.enable_gradient_checkpointing()
         controlnet.enable_gradient_checkpointing()
 
+    if args.use_lora:
+        transformer_lora_config = LoraConfig(
+            r=args.rank,
+            lora_alpha=args.lora_alpha,
+            init_lora_weights=True,
+            target_modules=["to_k", "to_q", "to_v", "to_out.0"],
+        )
+        transformer.add_adapter(transformer_lora_config)
+    
+
     def unwrap_model(model):
         model = accelerator.unwrap_model(model)
         model = model._orig_mod if is_compiled_module(model) else model
@@ -884,8 +898,12 @@ def main(args):
     if args.mixed_precision == "fp16":
         # only upcast trainable parameters into fp32
         cast_training_params([controlnet], dtype=torch.float32)
+        if args.use_lora:
+            cast_training_params([transformer], dtype=torch.float32)
 
     trainable_parameters = list(filter(lambda p: p.requires_grad, controlnet.parameters()))
+    if args.use_lora:
+        trainable_parameters += list(filter(lambda p: p.requires_grad, transformer.parameters()))
 
     # Optimization parameters
     trainable_parameters_with_lr = {"params": trainable_parameters, "lr": args.learning_rate}
@@ -960,6 +978,7 @@ def main(args):
     train_dataset = data.train_dataset
     train_dataloader = data.train_dataloader()
     # jho added <<<<
+    breakpoint()
 
     # Scheduler and math around the number of training steps.
     overrode_max_train_steps = False
@@ -1031,7 +1050,7 @@ def main(args):
     )
     vae_scale_factor_spatial = 2 ** (len(vae.config.block_out_channels) - 1)
     
-
+    loss_avgmeter = AverageMeter()
     # For DeepSpeed training
     model_config = transformer.module.config if hasattr(transformer, "module") else transformer.config
     data_time = _start_data_time = 0
@@ -1154,8 +1173,11 @@ def main(args):
                         save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}.pt")
                         torch.save({'state_dict': unwrap_model(controlnet).state_dict()}, save_path)
                         logger.info(f"Saved state to {save_path}")
-
-            logs = {"data": data_time, "loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0], }
+            #### jho added >>>>
+            avg_loss = accelerator.gather(loss.repeat(args.train_batch_size)).mean().item()
+            loss_avgmeter.update(avg_loss, 1)
+            #### jho added <<<<
+            logs = {"data": data_time, "loss": loss.detach().item(), "loss_avg": loss_avgmeter.avg, "lr": lr_scheduler.get_last_lr()[0], }
             progress_bar.set_postfix(**logs)
             accelerator.log(logs, step=global_step)
 
