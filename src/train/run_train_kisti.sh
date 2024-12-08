@@ -1,18 +1,18 @@
 #!/bin/sh
-#SBATCH -J a100_test
-#SBATCH --gres=gpu:4
-#SBATCH --cpus-per-task=72
+#SBATCH -J H200_test2
+#SBATCH --gres=gpu:2
+#SBATCH --cpus-per-task=64
 #SBATCH --time=11:59:00
-#SBATCH -p amd_a100nv_8
+#SBATCH -p eme_h200nv_8
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --comment pytorch
 #SBATCH -o exp_nohup/%j_%x.txt
 #SBATCH -e exp_nohup/%j_%x.err
 
-GPU_IDX="0,1,2,3"
+GPU_IDX="0,1"
 NGPU=$(echo $GPU_IDX | tr -cd ',' | wc -c)
-BS=1
+BS=2
 HEIGHT=480
 WIDTH=720
 MAX_NUM_FRAMES=49
