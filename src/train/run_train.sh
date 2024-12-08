@@ -1,3 +1,5 @@
+#!/bin/sh
+
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:False
 GPU_IDX="0,1,2,3"
 NGPU=$(echo $GPU_IDX | tr -cd ',' | wc -c)
