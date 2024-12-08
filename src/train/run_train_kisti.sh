@@ -1,16 +1,15 @@
 #!/bin/sh
-#SBATCH -J H200_test
+#SBATCH -J a100_test
 #SBATCH --gres=gpu:4
 #SBATCH --cpus-per-task=72
 #SBATCH --time=11:59:00
-#SBATCH -p eme_h200nv_8
+#SBATCH -p amd_a100nv_8
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --comment pytorch
 #SBATCH -o exp_nohup/%j_%x.txt
 #SBATCH -e exp_nohup/%j_%x.err
 
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:False
 GPU_IDX="0,1,2,3"
 NGPU=$(echo $GPU_IDX | tr -cd ',' | wc -c)
 BS=1
@@ -31,7 +30,7 @@ fi
 #### 3. master_port 확인
 
 CURRENT_TIMESTAMP=$(TZ='Asia/Seoul' date +%Y%m%d)
-CUDA_VISIBLE_DEVICES=$GPU_IDX nohup accelerate launch --config_file ./configs/accelerate_config_machine_single.yaml --main_process_port 1315 --num_processes ${NGPU} \
+CUDA_VISIBLE_DEVICES=$GPU_IDX accelerate launch --config_file ./configs/accelerate_config_machine_single.yaml --main_process_port 1315 --num_processes ${NGPU} \
   train_controlnet.py \
   --train_batch_size ${BS} \
   --height ${HEIGHT} \
@@ -60,7 +59,7 @@ CUDA_VISIBLE_DEVICES=$GPU_IDX nohup accelerate launch --config_file ./configs/ac
   --lr_scheduler cosine_with_restarts \
   --lr_warmup_steps 250 \
   --save_name ${SAVE_NAME} \
-  --allow_tf32 &> "./exp_nohup/${CURRENT_TIMESTAMP}_${SAVE_NAME}.txt" &
+  --allow_tf32
   # --enable_slicing \
   # --enable_tiling \
   # --gradient_accumulation_steps 1 \
